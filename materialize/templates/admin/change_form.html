@@ -1,0 +1,208 @@
+{% extends 'admin/base.html' %}
+{% load i18n static admin_modify suit_tags admin_urls custom_submit_row %}
+
+{% block title %}{{ opts.verbose_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb breadcrumb-style1">
+    <li class="breadcrumb-item">
+      <a href="javascript:void(0);">{% trans 'Home' %}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      {% if has_change_permission %}
+      <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+      {% else %}
+      <a href="#">{{ opts.verbose_name_plural|capfirst }}</a>
+      {% endif %}
+    </li>
+    <li class="breadcrumb-item active">{% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %} {{ original|truncatewords:"18" }}{% endif %}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/widgets.css' %}" />
+<link rel="stylesheet" href="{% static 'materialize' %}/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" type="text/css" href="{% static 'materialize/assets/css/custom-widgets.css' %}" />
+<style>
+  .inline-deletelink {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
+  .add-row {
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  .add-row > a {
+    background-color: #FFC107;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{% url 'admin:jsi18n' as jsi18nurl %}
+<script type="text/javascript" src="{{ jsi18nurl|default:'../../../jsi18n/' }}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+<script type="text/javascript">
+	django.formats.DATE_INPUT_FORMATS = ["%d-%m-%Y", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%Y", "%d %b %Y", "%d %B %Y",
+		"%Y-%m-%d"
+	]
+</script>
+<!-- Vendors JS -->
+<script src="{% static 'materialize' %}/assets/vendor/libs/moment/moment.js"></script>
+<script src="{% static 'materialize' %}/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="{% static 'materialize' %}/assets/js/cards-actions.js"></script>
+<script>
+  $(function(){
+    const flatpickrDate = $('.flatpickr-input[size=10]');
+    const flatpickrTime = $('.flatpickr-input[size=8]');
+    if (flatpickrDate) {
+      flatpickrDate.flatpickr({
+        monthSelectorType: 'static',
+        dateFormat: 'Y-m-d'
+      });
+    }
+
+    if (flatpickrTime) {
+      flatpickrTime.flatpickr({
+        enableTime: true,
+        noCalendar: true
+      });
+    }
+  });
+</script>
+{% endblock %}
+
+{% block bodyclass %}
+{{ block.super }} {{ opts.app_label }}-{{ opts.object_name.lower }} change-form
+{% endblock %}
+
+{% block content %}
+  {% if not has_delete_permission and not has_change_permission and add %}
+		<div class="alert alert-danger">
+			Pastikan yang Anda inputkan benar, karena Anda <strong>HANYA</strong> dapat menambahkan data ini dan
+			<strong>TIDAK</strong> dapat mengubah ataupun menghapus data yang telah Anda tambahkan.
+		</div>
+		{% elif not has_delete_permission and has_add_permission and add %}
+		<div class="alert alert-danger">
+			Pastikan yang Anda inputkan benar, karena <strong>TIDAK</strong> dapat menghapus data ini.
+		</div>
+		{% endif %}
+		{% if errors %}
+		<div class="alert alert-danger">
+			{% blocktrans count counter=errors|length %}Harap perbaiki kesalahan di bawah.{% plural %}Mohon perbaiki
+			kesalahan di bawah.{% endblocktrans %}
+			{{ adminform.form.non_field_errors }}
+		</div>
+  {% endif %}
+
+  <div class="card card-body p-3 mb-3">
+    {% block form_top %}{% endblock %}
+
+    <blockquote class="mb-0">
+      {% blocktrans %}Inputs with <strong>bold</strong> labels are required.
+      {% endblocktrans %}<br>
+      Press <img width="10" height="10" src="{% static 'admin/img/icon-addlink.svg' %}"
+        alt="Tambah"> to add another item that is not available in the selection list.<br>
+      Press <img width="10" height="10" src="{% static 'admin/img/icon-changelink.svg' %}"
+        alt="Ubah"> to change the items in the selection list.
+    </blockquote>
+  </div>
+
+  <form {% if has_file_field %}enctype="multipart/form-data"{% endif %} action="{{ form_url }}" method="post"
+			id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}
+    <div class="card card-action">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-action-title m-0 me-2">Form {{ title }}</h5>
+
+        <div class="card-action-element">
+          <ul class="list-inline mb-0">
+            <li class="list-inline-item">
+              <a href="javascript:void(0);" class="card-collapsible"
+                ><i class="tf-icons mdi mdi-chevron-up"></i
+              ></a>
+            </li>
+            <li class="list-inline-item">
+              <a href="javascript:void(0);" class="card-expand">
+                <i class="tf-icons mdi mdi-fullscreen"></i>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a href="javascript:void(0);" class="dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="tf-icons mdi mdi-dots-vertical"></i>
+              </a>
+              {% block object-tools %}
+              {% if change %}
+              {% if not is_popup %}
+              {% block extra-object-tools-items %}
+              <ul class="dropdown-menu">
+                {% if user.is_superuser %}
+                <li>
+                  {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+                  <a class="dropdown-item waves-effect" href="{% add_preserved_filters history_url %}">{% trans "History" %}</a>
+                </li>
+                {% endif %}
+              </ul>
+              {% endblock %}
+              {% endif %}
+              {% endif %}
+              {% endblock %}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="collapse show">
+        <div class="card-body p-0">
+
+          {% if is_popup %}<input type="hidden" name="_popup" value="1" />{% endif %}
+          {% block field_sets %}
+            {% for fieldset in adminform %}
+            {% include "admin/includes/fieldset.html" %}
+            {% endfor %}
+            <br/>
+          {% endblock %}
+          
+          {% block after_field_sets %}{% endblock %}
+
+          {% block inline_field_sets %}
+            {% for inline_admin_formset in inline_admin_formsets %}
+              {% include inline_admin_formset.opts.template %}
+            {% endfor %}
+          {% endblock %}
+          {% block after_related_objects %}{% endblock %}
+        </div>
+      </div>
+
+      <div class="card-footer">
+        {% block submit_buttons_bottom %}{% custom_submit_row %}{% endblock %}
+        {% if adminform.first_field and add %}
+        <script type="text/javascript">
+          if ($("#{{ adminform.first_field.id_for_label }}").length > 0) {
+            document.getElementById("{{ adminform.first_field.id_for_label }}").focus();
+          }
+        </script>
+        {% endif %}
+        {# JavaScript for prepopulated fields #}
+        {% prepopulated_fields_js %}
+      </div>
+    </div>
+  </form>
+{% endblock %}

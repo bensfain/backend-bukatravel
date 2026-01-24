@@ -1,0 +1,12 @@
+{% load i18n admin_urls suit_tags %}
+<div class="submit-row clearfix">
+  {% if show_save %}<button type="submit" class="btn btn-sm btn-primary waves-effect waves-light" name="_save">{% trans 'Save' %}</button>{% endif %}
+  {% if show_save_and_continue %}<button type="submit" name="_continue" class="btn btn-sm btn-label-secondary waves-effect waves-light">{% trans 'Save and continue editing' %}</button>{% endif %}
+  {% if show_save_as_new %}<button type="submit" name="_saveasnew" class="btn btn-sm btn-label-secondary waves-effect waves-light">{% trans 'Save as new' %}</button>{%endif%}
+  {% if show_save_and_add_another %}<button type="submit" name="_addanother" class="btn btn-sm btn-label-secondary waves-effect waves-light">{% trans 'Save and add another' %}</button>{% endif %}
+
+  {% if show_delete_link %}
+    {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+    <a href="{% add_preserved_filters delete_url %}" class="btn btn-sm btn-danger waves-effect waves-light">{% trans "Delete" %}</a>
+  {% endif %}
+</div>

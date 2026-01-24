@@ -1,0 +1,36 @@
+# bukatravel/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('get_balance/', views.get_balance, name='get_balance'),
+    path('assign_post_seats/', views.assign_post_seats, name='assign_post_seats'),
+    path('assign_seats/', views.assign_seats, name='assign_seats'),
+    path('cancel/', views.cancel, name='cancel'),
+    path('commit_booking/', views.commit_booking, name='commit_booking'),
+    path('get_booking/', views.get_booking, name='get_booking'),
+    path('get_carrier_providers/', views.get_carrier_providers, name='get_carrier_providers'),
+    path('get_carriers/', views.get_carriers, name='get_carriers'),
+    path('get_destination_list/', views.get_destination_list, name='get_destination_list'),
+    path('get_fare_rules/', views.get_fare_rules, name='get_fare_rules'),
+    path('get_ff_availability/', views.get_ff_availability, name='get_ff_availability'),
+    path('get_post_seat_availability/', views.get_post_seat_availability, name='get_post_seat_availability'),
+    path('get_post_ssr_availability/', views.get_post_ssr_availability, name='get_post_ssr_availability'),
+    path('get_price_itinerary/', views.get_price_itinerary, name='get_price_itinerary'),
+    path('get_printout_list/', views.get_printout_list, name='get_printout_list'),
+    path('get_refund_booking/', views.get_refund_booking, name='get_refund_booking'),
+    path('get_reschedule_availability/', views.get_reschedule_availability, name='get_reschedule_availability'),
+    path('get_seat_availability/', views.get_seat_availability, name='get_seat_availability'),
+    path('get_ssr_availability/', views.get_ssr_availability, name='get_ssr_availability'),
+    path('issued/', views.issued, name='issued'),
+    path('pre_refund_login_list/', views.pre_refund_login_list, name='pre_refund_login_list'),
+    path('search/', views.search, name='search'),
+    path('sell_journeys/', views.sell_journeys, name='sell_journeys'),
+    path('sell_post_ssrs/', views.sell_post_ssrs, name='sell_post_ssrs'),
+    path('sell_reschedule/', views.sell_reschedule, name='sell_reschedule'),
+    path('sell_ssrs/', views.sell_ssrs, name='sell_ssrs'),
+    path('signout/', views.signout, name='signout'),
+    path('update_booking/', views.update_booking, name='update_booking'),
+    path('update_contacts/', views.update_contacts, name='update_contacts'),
+    path('update_passengers/', views.update_passengers, name='update_passengers'),
+]

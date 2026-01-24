@@ -1,0 +1,77 @@
+.info-form > p {
+  margin: 0;
+}
+
+.text-help {
+  font-size: 13px;
+}
+
+.text-help > .errorlist {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: red;
+}
+
+.widget-AdminSplitDateTime {
+  align-items: stretch !important;
+  display: flex !important;
+}
+
+.related-widget-wrapper .selector {
+  width: 770px;
+}
+
+.related-widget-wrapper .selector h2 {
+  background: url(../img/default-bg.gif) repeat-x scroll left top #7ca0c7;
+  font-size: 13px;
+  font-weight: bold;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: white;
+}
+
+.related-widget-wrapper .selector .selector-available, .related-widget-wrapper .selector .selector-chosen {
+  border: 1px solid #767676;
+  border-radius: 5px;
+  background-color: #dadada;
+}
+
+.related-widget-wrapper .selector .selector-available a.selector-chooseall, .related-widget-wrapper .selector .selector-chosen a.selector-clearall {
+  font-size: 12px;
+}
+
+.related-widget-wrapper .selector-available, .related-widget-wrapper .selector-chosen {
+  width: 365px;
+}
+
+.related-widget-wrapper .selector select {
+  width: 361px;
+  margin: 0 0 0 1px;
+}
+
+.related-widget-wrapper .selector .selector-filter label {
+  margin-top: 2px;
+}
+
+.related-widget-wrapper .selector .selector-filter input {
+  border-radius: 5px;
+  border: 1px solid #607D8B;
+  padding-left: 10px;
+}
+
+.widget-RelatedFieldWidgetWrapper .text-help {
+  margin-left: 5px;
+}
+
+.related-widget-wrapper {
+  display: inline-flex;
+  width: 100%;
+}
+
+.related-widget-wrapper select.form-control {
+  width: 65%;
+}
+
+select + .related-widget-wrapper-link, .related-widget-wrapper-link + .related-widget-wrapper-link {
+  padding-top: 6px;
+}

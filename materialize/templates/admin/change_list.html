@@ -1,0 +1,144 @@
+{% extends "admin/base.html" %}
+{% load i18n static admin_list admin_urls suit_tags %}
+
+{% block title %}{{ cl.opts.verbose_name_plural|capfirst }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb breadcrumb-style1">
+    <li class="breadcrumb-item">
+      <a href="javascript:void(0);">{% trans 'Home' %}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:app_list' app_label=cl.opts.app_label %}">{% firstof opts.app_config.verbose_name app_label|capfirst|escape %}</a>
+    </li>
+    <li class="breadcrumb-item active">
+      {{ cl.opts.verbose_name_plural|capfirst }}
+    </li>
+    {% block extra_breadcrumb %}
+    
+    {% endblock extra_breadcrumb %}
+  </ol>
+</nav>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+{{ media.js }}
+{% if action_form %}{% if actions_on_top or actions_on_bottom %}
+<script type="text/javascript">
+    // (function ($) {
+    //     $(document).ready(function ($) {
+    //     });
+    // })(django.jQuery);
+</script>
+{% endif %}{% endif %}
+{% endblock %}
+
+{% block extrajs %}
+<!-- <script src="{% static 'materialize/js/actions.js' %}"></script> -->
+<!-- <script src="{% static 'scripts/jsi18n.js' %}"></script> -->
+<!-- <script src="{% static 'scripts/actions.js' %}"></script> -->
+
+<!-- <script src="{% static 'materialize/js/actions.js' %}"></script> -->
+{% endblock %}
+
+
+{% block content %}
+{% block date_hierarchy %}{% date_hierarchy cl %}{% endblock %}
+{% block search %}{% search_form cl %}{% endblock %}
+{% block extra-tools %}{% endblock %}
+
+<div class="row">
+  <div class="col-lg-12">
+    {% if cl.formset.errors %}
+    <p class="errornote">
+      {% if cl.formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+    </p>
+    {{ cl.formset.non_form_errors }}
+    {% endif %}
+  </div>
+</div>
+
+<div class="card card-custom" id="kt_card_1">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h5 class="card-title m-0 me-2">
+      {% if extra_title %}
+        {{ extra_title }}
+      {% else %}
+        {% block header-extra-object-tools %}
+        Choose {{ cl.opts.verbose_name_plural|capfirst }}
+        {% endblock %}
+      {% endif %}
+    </h5>
+    {% block actions %}
+    <div class="dropdown">
+      {% if add_card_header_button %}
+        {{ add_card_header_button }}
+      {% endif %}
+      {% if has_add_permission %}
+        {% url cl.opts|admin_urlname:'add' as add_url %}
+        <a href="{% add_preserved_filters add_url is_popup %}" class="btn btn-xs btn-outline-primary waves-effect">
+          <i class="nav-icon mdi mdi-plus"></i> {% trans 'Add' %}</a>
+      {% endif %}
+      {% block filters %}
+      {% if cl.has_filters %}
+        <button
+          class="btn btn-xs btn-primary"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasEnd_filter_id"
+          aria-controls="offcanvasEnd">
+          <i class="nav-icon mdi mdi-filter"></i> {% trans 'Filter' %}
+        </button>
+        <div
+          class="offcanvas offcanvas-end"
+          tabindex="-1"
+          id="offcanvasEnd_filter_id"
+          aria-labelledby="offcanvasEndLabel">
+          <div class="offcanvas-header">
+            <h5 id="offcanvasEndLabel" class="offcanvas-title">{% trans 'Filter' %} {{ cl.opts.verbose_name_plural|capfirst }}</h5>
+            <button
+              type="button"
+              class="btn-close text-reset"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body my-auto mx-0 flex-grow-0">
+            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+          </div>
+        </div>
+      {% endif %}
+      {% endblock %}
+    </div>
+    {% endblock %}
+  </div>
+  
+  <div class="card-body p-0">
+    <form id="changelist-form" action="" method="post" {% if cl.formset.is_multipart %}
+        enctype="multipart/form-data" {% endif %}>{% csrf_token %}
+      <div class="card-body p-0">
+        {% if cl.formset %}
+        <div>{{ cl.formset.management_form }}</div>
+        {% endif %}
+        {% block result_list %}
+          {% block custom_action %}
+            {% if action_form and cl.full_result_count %}
+              <div style="margin-bottom: 15px;">{% admin_actions %}</div>
+            {% endif %}
+          {% endblock %}
+          {% block custom_result_list %}
+            {% result_list cl %}
+          {% endblock %}
+        {% endblock %}
+      </div>
+      <div class="card-footer">
+        <div class="text-center">
+            {% block pagination %}{% pagination cl %}{% endblock %}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

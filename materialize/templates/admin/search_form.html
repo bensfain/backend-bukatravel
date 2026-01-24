@@ -1,0 +1,24 @@
+{% load i18n static %}
+{% if cl.search_fields %}
+<div id="toolbar">
+	<form id="changelist-search" action="" method="get">
+		<div class="row justify-content-end mb-3">
+			<div class="col-md-6">
+				<div class="card card-body p-1">
+					<div class="input-group input-group-merge">
+                        <span class="input-group-text" id="basic-addon-search31"><i class="mdi mdi-magnify"></i></span>
+                        <input type="text" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" class="form-control" placeholder="{% trans 'Search' %}..." aria-label="Search..." aria-describedby="basic-addon-search31">
+					</div>
+				</div>
+				{% if show_result_count %}
+					<span class="small quiet pull-right" style="padding-top: 5px;">{% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %} (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">{% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktrans %}</a>)</span>
+				{% endif %}
+			</div>
+		</div>		
+		{% for pair in cl.params.items %}
+			{% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}"/>{% endif %}
+		{% endfor %}
+	</form>
+</div>
+<script type="text/javascript">document.getElementById("searchbar").focus();</script>
+{% endif %}
