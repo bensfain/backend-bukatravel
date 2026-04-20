@@ -8,6 +8,8 @@ from .api.serializers import (
     UserSerializer, AdminRegisterSerializer, 
     AdminTokenObtainPairSerializer, AdminSerializer
 )
+from django.shortcuts import get_object_or_404
+from .models import User #importing user
 
 # ================= USER AUTH =================
 class UserRegisterView(generics.CreateAPIView):
@@ -27,7 +29,17 @@ class UserProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     
     def get_object(self):
-        return self.request.user
+        # Kita ambil ID dari token, lalu nyari data di tabel User.
+        #return self.request.user
+        user_id = self.request.user.id
+        
+        #fetching data dari tabel user
+        obj = get_object_or_404(User, id=user_id)
+        
+        #cek permission
+        self.check_object_permissions(self.request, obj)
+        
+        return obj
 
 # ================= ADMIN AUTH =================
 class AdminRegisterView(generics.CreateAPIView):

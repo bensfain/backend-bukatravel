@@ -167,16 +167,24 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # myproject/settings.py
 
-# REDIS
+
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",  # Gunakan "redis://127.0.0.1:6379/1" jika tanpa Docker
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
+
+# REDIS
+#CACHES = {
+#    "default": {
+#        "BACKEND": "django_redis.cache.RedisCache",
+#        "LOCATION": "redis://redis:6379/1",  # Gunakan "redis://127.0.0.1:6379/1" jika tanpa Docker
+#        "OPTIONS": {
+#            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#        },
+#    }
+#}
 
 # BUKATRAVEL ENV
 BUKATRAVEL_USER = config("BUKATRAVEL_USER")

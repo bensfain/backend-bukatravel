@@ -7,12 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.conf import settings
-from django.http import JsonResponse
 from bukatravel.api import serializers
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view
 from django.core.cache import cache
-from .api import serializers
+
 
 BASE_URL = 'https://apiinternal.orbisway.com'
         
@@ -33,18 +31,31 @@ def get_bukatravel_signature():
         response.raise_for_status()
         response_data = response.json()
         
-        # result
+        #Ambil result
         result = response_data.get('result', {})
         
-        # fetch object response
+        #  Cek Error Code Dulu
+        error_code = result.get("error_code")
+        
+        # Jika error_code BUKAN 0, berarti Gagal Login
+        if error_code != 0:
+            print("\n" + "!"*30)
+            print(f"❌ GAGAL LOGIN KE ORBIS!")
+            print(f"Error Code: {error_code}")
+            print(f"Pesan: {result.get('error_msg')}")
+            print("!"*30 + "\n")
+            return None
+        
+        
+        # Jika Lolos (Login Sukses), baru ambil signature
         response_obj = result.get("response")
         
         signature = None        
         
         #signature = response_data.get("result", {}).get("response", {}).get("signature")
-        #cek bentuk result apakah dictionary
+        #cek bentuk result apakah berbentuk dictionary
         if isinstance(response_obj, dict):
-            # Kalau Dictionary,  ambil signature
+            # Kalau Dictionary, lanjut ambil signature
             signature = response_obj.get("signature")
 
         if signature:
@@ -76,163 +87,26 @@ def call_orbis_api(endpoint, action, payload=None):
 
 @api_view(['POST'])
 def get_balance(request):
-    # response = call_orbis_api("account", "get_balance")
-    # return Response(response.json())
-    dummy_response = {
-        "error_code": 0,
-        "error_msg": "",
-        "result": {
-            "balance": 50000000, # DUMMY 50 Juta
-            "currency": "IDR",
-            "credit_limit": 10000000
-        }
-    }
-    return Response(dummy_response)
-
-@api_view(['GET','POST'])
-@permission_classes([AllowAny]) #  (Bypass Login)
-def search(request):
-    # 1. validasi input
-    serializer = serializers.SearchFlightSerializer(data=request.data)
-
-    if serializer.is_valid():
-   
-        # Code asli untuk koneksi ke Orbis:
-        # response = call_orbis_api("booking/airline", "search", serializer.validated_data)
-        # return Response(response.json())
-
-        # return Data Dummy Tiket Pesawat:
-        dummy_response = {
-            "error_code": 0,
-            "error_msg": "",
-            "result": {
-                "session_id": "MOCK-SESSION-9999", # ID Sesi pencarian
-                "schedules": [
-                    [
-                        {
-                            "journey_sell_key": "JT-KEY-123",
-                            "airline": {
-                                "code": "JT",
-                                "name": "Lion Air",
-                                "icon": "https://bit.ly/logo-lion-air"
-                            },
-                            "flight_number": "JT-690",
-                            "seat_class": "Economy",
-                            "departure": {
-                                "airport_code": serializer.validated_data.get('origin'), #  input user
-                                "city": "Jakarta", 
-                                "time": "2026-02-15 08:00:00"
-                            },
-                            "arrival": {
-                                "airport_code": serializer.validated_data.get('destination'), #  input user
-                                "city": "Bali",
-                                "time": "2026-02-15 10:50:00"
-                            },
-                            "duration": "1h 50m",
-                            "price": {
-                                "currency": "IDR",
-                                "amount": 950000,
-                                "detail": "Rp 950.000 / pax"
-                            },
-                            "is_transit": False
-                        }
-                    ],
-                    [
-                        {
-                            "journey_sell_key": "GA-KEY-456",
-                            "airline": {
-                                "code": "GA",
-                                "name": "Garuda Indonesia",
-                                "icon": "https://bit.ly/logo-garuda"
-                            },
-                            "flight_number": "GA-404",
-                            "seat_class": "Economy",
-                            "departure": {
-                                "airport_code": serializer.validated_data.get('origin'),
-                                "city": "Jakarta",
-                                "time": "2026-02-15 13:00:00"
-                            },
-                            "arrival": {
-                                "airport_code": serializer.validated_data.get('destination'),
-                                "city": "Bali",
-                                "time": "2026-02-15 15:55:00"
-                            },
-                            "duration": "1h 55m",
-                            "price": {
-                                "currency": "IDR",
-                                "amount": 1850000,
-                                "detail": "Rp 1.850.000 / pax"
-                            },
-                            "is_transit": False
-                        }
-                    ]
-                ]
-            }
-        }
-        
-        return Response(dummy_response)
-
-    #ketika input json dari FE kurang, return 400
-    return Response(serializer.errors, status=400)
-
-@api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
-def get_destination_list(request):
-   # MOcking data bandara
-
-    dummy_response = {
-        "error_code": 0,
-        "error_msg": "",
-        "result": [
-            {
-                "code": "CGK",
-                "name": "Soekarno-Hatta International Airport",
-                "city_name": "Jakarta",
-                "country_name": "Indonesia",
-                "country_code": "ID"
-            },
-            {
-                "code": "DPS",
-                "name": "Ngurah Rai International Airport",
-                "city_name": "Denpasar",
-                "country_name": "Indonesia",
-                "country_code": "ID"
-            },
-            {
-                "code": "SUB",
-                "name": "Juanda International Airport",
-                "city_name": "Surabaya",
-                "country_name": "Indonesia",
-                "country_code": "ID",
-            },
-            {
-                "code": "KNO",
-                "name": "Kualanamu International Airport",
-                "city_name": "Medan",
-                "country_name": "Indonesia",
-                "country_code": "ID"
-            },
-            {
-                "code": "SIN",
-                "name": "Changi International Airport",
-                "city_name": "Singapore",
-                "country_name": "Singapore",
-                "country_code": "SG"
-            },
-            {
-                "code": "HND",
-                "name": "Haneda Airport",
-                "city_name": "Tokyo",
-                "country_name": "Japan",
-                "country_code": "JP"
-            }
-        ]
-    }
-
-    return Response(dummy_response)
+    response = call_orbis_api("account", "get_balance")
+    return Response(response.json())
 
 @api_view(['POST'])
+def search(request):
+    serializer = serializers.SearchFlightSerializer(data=request.data)
+    if serializer.is_valid():
+        response = call_orbis_api("booking/airline", "search", serializer.validated_data)
+        return Response(response.json())
+    return Response(serializer.errors, status=400)
 
+@api_view(['POST'])
+def get_destination_list(request):
+    serializer = serializers.GetDestinationListSerializer(data=request.data)
+    if serializer.is_valid():
+        response = call_orbis_api("content", "get_destination_list", serializer.validated_data)
+        return Response(response.json())
+    return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
 def get_carriers(request):
     serializer = serializers.GetCarriersSerializer(data=request.data)
     if serializer.is_valid():
@@ -260,8 +134,8 @@ def make_api_view(endpoint, action, serializer_class):
     @api_view(['POST'])
     def view(request):
         serializer = serializer_class(data=request.data)
-        if serializer.is_valid(): #validasi
-            response = call_orbis_api(endpoint, action, serializer.validated_data) #API Conn
+        if serializer.is_valid():
+            response = call_orbis_api(endpoint, action, serializer.validated_data)
             return Response(response.json())
         return Response(serializer.errors, status=400)
     return view
@@ -290,4 +164,3 @@ assign_post_seats = make_api_view("booking/airline", "assign_post_seats", serial
 commit_booking = make_api_view("booking/airline", "commit_booking", serializers.CommitBookingSerializer)
 cancel = make_api_view("booking/airline", "cancel", serializers.CancelBookingSerializer)
 get_booking = make_api_view("booking/airline", "get_booking", serializers.GetBookingSerializer)
-

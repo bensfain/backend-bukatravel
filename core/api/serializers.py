@@ -31,12 +31,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 class UserSerializer(serializers.ModelSerializer):
-    role_name = serializers.CharField(source='role.role_name', read_only=True)
+    role_name = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'name', 'mobile_phone', 'role', 'role_name']
-
+    def get_role_name(self, obj):
+        # DEBUG: Intip siapa sebenarnya 'obj' ini?
+        print(f"DEBUG PROFILE: User ID={obj.id}, Type={type(obj)}, Role={getattr(obj, 'role', 'GAK PUNYA')}")
+        
+        # Cek 1: Apakah obj ini punya atribut 'role'? (Menangani kasus Salah Tabel/Admin)
+        if not hasattr(obj, 'role'):
+            return "Error: Salah Tabel (Bukan User)"
+            
+        # Cek 2: Apakah role-nya ada isinya? (Menangani kasus Data Kosong)
+        if obj.role:
+            return obj.role.role_name
+        
+        return None
+    
 # ================= ADMIN =================
 class AdminRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
